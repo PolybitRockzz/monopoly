@@ -114,9 +114,11 @@ export default function RoomPage() {
       if (!error) {
         const list: string[] = Array.isArray(data?.username) ? data.username : [];
         const next = list.filter((u) => u !== username);
+        const updates: any = { username: next };
+        if (next.length === 0) updates.started = false;
         await supabase
           .from("games")
-          .update({ username: next })
+          .update(updates)
           .eq("room_id", roomid);
       }
     } catch {}
