@@ -1,15 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +16,155 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Orbitron', monospace;
+  overflow-x: hidden;
+}
+
+/* Arcade Styling */
+.arcade-container {
+  position: relative;
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+.arcade-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #a855f7, #ec4899, #8b5cf6, #d946ef);
+  border-radius: 1.75rem;
+  z-index: -1;
+  animation: borderGlow 2s linear infinite;
+}
+
+.arcade-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  animation: titlePulse 2s ease-in-out infinite alternate;
+}
+
+.arcade-input {
+  font-family: 'Orbitron', monospace;
+  border-width: 2px;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arcade-input:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+}
+
+.play-button {
+  font-family: 'Orbitron', monospace;
+  border-width: 3px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899, #a855f7);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+.play-button:hover:not(:disabled) {
+  animation: gradientShift 1s ease infinite, buttonPulse 0.3s ease;
+}
+
+.play-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.input-group {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.input-group:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+/* Keyframe Animations */
+@keyframes glow {
+  from {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+  }
+  to {
+    box-shadow: 0 0 50px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% { 
+    background: linear-gradient(45deg, #a855f7, #ec4899, #8b5cf6, #d946ef); 
+  }
+  25% { 
+    background: linear-gradient(45deg, #ec4899, #8b5cf6, #d946ef, #a855f7); 
+  }
+  50% { 
+    background: linear-gradient(45deg, #8b5cf6, #d946ef, #a855f7, #ec4899); 
+  }
+  75% { 
+    background: linear-gradient(45deg, #d946ef, #a855f7, #ec4899, #8b5cf6); 
+  }
+}
+
+@keyframes titlePulse {
+  from {
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    transform: scale(1);
+  }
+  to {
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom border width utilities */
+.border-3 {
+  border-width: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .arcade-title {
+    font-size: 2.5rem;
+  }
+  
+  .arcade-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
 }
