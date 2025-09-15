@@ -34,10 +34,10 @@ export default function Home() {
         localStorage.setItem("monopoly:username", u);
       } catch {}
 
-      // Check if room exists in Supabase games table (room_id is PK)
+      // Check if room exists and whether it has started
       const { data, error } = await supabase
         .from("games")
-        .select("room_id")
+        .select("room_id, started")
         .eq("room_id", r)
         .single();
 
@@ -51,6 +51,10 @@ export default function Home() {
       }
 
       if (data?.room_id) {
+        if (data?.started) {
+          setError("This game has already started. Please join another room or wait for the next game.");
+          return;
+        }
         router.push(`/${r}`);
       } else {
         setError("Room not found. Check the room ID.");
