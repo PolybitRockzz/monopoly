@@ -71,7 +71,7 @@ export default function Home() {
       <div className="arcade-container bg-purple-800/30 backdrop-blur-lg rounded-3xl border-4 border-purple-400 shadow-2xl shadow-purple-500/25 p-8 w-full max-w-md">
         {/* Title */}
         <div className="text-center mb-8">
-          <h1 className="arcade-title text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-2">
+          <h1 className="arcade-title text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-2">
             MONOPOLY
           </h1>
           <p className="text-purple-300 text-lg font-semibold tracking-wider">
