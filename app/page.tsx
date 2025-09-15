@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 
 export default function Home() {
   const [username, setUsername] = useState("");
   const [roomId, setRoomId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Prefill username from localStorage on first render
   useEffect(() => {
@@ -16,16 +21,44 @@ export default function Home() {
     }
   }, []);
 
-  const handlePlay = () => {
-    if (username.trim() && roomId.trim()) {
+  const handlePlay = async () => {
+    setError(null);
+    const u = username.trim();
+    const r = roomId.trim();
+    if (!u || !r) return;
+
+    setLoading(true);
+    try {
       // Persist username for future visits
       try {
-        localStorage.setItem("monopoly:username", username.trim());
-      } catch (e) {
-        // ignore storage errors
+        localStorage.setItem("monopoly:username", u);
+      } catch {}
+
+      // Check if room exists in Supabase games table (room_id is PK)
+      const { data, error } = await supabase
+        .from("games")
+        .select("room_id")
+        .eq("room_id", r)
+        .single();
+
+      if (error) {
+        if ((error as any).code === "PGRST116" || error.message.includes("No rows")) {
+          setError("Room not found. Check the room ID.");
+        } else {
+          setError(error.message);
+        }
+        return;
       }
-      // Handle game start logic here
-      console.log("Starting game with:", { username, roomId });
+
+      if (data?.room_id) {
+        router.push(`/${r}`);
+      } else {
+        setError("Room not found. Check the room ID.");
+      }
+    } catch (e: any) {
+      setError(e?.message ?? "Something went wrong.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,12 +110,16 @@ export default function Home() {
         <div className="mt-8">
           <button
             onClick={handlePlay}
-            disabled={!username.trim() || !roomId.trim()}
+            disabled={!username.trim() || !roomId.trim() || loading}
             className="play-button w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-xl uppercase tracking-wider rounded-xl border-3 border-purple-300 shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
           >
-            🎮 PLAY! 🎮
+            {loading ? "Checking..." : "🎮 PLAY! 🎮"}
           </button>
         </div>
+
+        {error && (
+          <p className="mt-4 text-center text-pink-300 font-semibold">{error}</p>
+        )}
 
         {/* Decorative Elements */}
         <div className="mt-6 flex justify-center space-x-4 text-purple-300">
