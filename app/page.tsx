@@ -34,10 +34,10 @@ export default function Home() {
         localStorage.setItem("monopoly:username", u);
       } catch {}
 
-      // Check if room exists and whether it has started
+      // Check if room exists, whether it has started, and current usernames
       const { data, error } = await supabase
         .from("games")
-        .select("room_id, started")
+        .select("room_id, started, username")
         .eq("room_id", r)
         .single();
 
@@ -52,6 +52,12 @@ export default function Home() {
 
       if (data?.room_id) {
         if (data?.started) {
+          // Allow rejoin only if the username is already present in the room's username array
+          const list: string[] = Array.isArray(data?.username) ? data.username : [];
+          if (u && list.includes(u)) {
+            router.push(`/${r}`);
+            return;
+          }
           setError("This game has already started. Please join another room or wait for the next game.");
           return;
         }
