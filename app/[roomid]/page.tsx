@@ -144,7 +144,7 @@ export default function RoomPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
       <div className="arcade-container bg-purple-800/30 backdrop-blur-lg rounded-3xl border-4 border-purple-400 shadow-2xl shadow-purple-500/25 p-8 w-full max-w-lg">
         <div className="text-center mb-6">
-          <h1 className="arcade-title text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200">
+          <h1 className="arcade-title text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200">
             Room {roomid}
           </h1>
           <p className="text-purple-300 mt-2">Players in this room</p>
