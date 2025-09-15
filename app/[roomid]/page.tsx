@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 type Game = {
   room_id: string;
   username: string[] | null;
+  started?: boolean | null;
 };
 
 export default function RoomPage() {
@@ -18,6 +19,7 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [busyStart, setBusyStart] = useState(false);
   const username = useMemo(() => {
     if (typeof window === "undefined") return "";
     try {
@@ -26,6 +28,7 @@ export default function RoomPage() {
       return "";
     }
   }, []);
+  const isHost = Boolean(username && (game?.username?.[0] ?? null) === username);
 
   useEffect(() => {
     const load = async () => {
@@ -34,14 +37,14 @@ export default function RoomPage() {
       setError(null);
       const { data, error } = await supabase
         .from("games")
-        .select("room_id, username")
+        .select("room_id, username, started")
         .eq("room_id", roomid)
         .single();
 
       if (error) {
         setError(error.message);
       } else {
-        setGame({ room_id: data.room_id, username: data.username });
+        setGame({ room_id: data.room_id, username: data.username, started: data.started });
       }
       setLoading(false);
     };
@@ -66,9 +69,9 @@ export default function RoomPage() {
           .from("games")
           .update({ username: next })
           .eq("room_id", roomid)
-          .select("room_id, username")
+          .select("room_id, username, started")
           .single();
-        if (!updErr && upd) setGame({ room_id: upd.room_id, username: upd.username });
+        if (!updErr && upd) setGame({ room_id: upd.room_id, username: upd.username, started: upd.started });
       } catch {}
     };
     join();
@@ -84,8 +87,8 @@ export default function RoomPage() {
         { event: '*', schema: 'public', table: 'games', filter: `room_id=eq.${roomid}` },
         (payload: any) => {
           const newRow = payload?.new;
-          if (newRow?.username) {
-            setGame((g) => ({ room_id: newRow.room_id, username: newRow.username }));
+          if (newRow) {
+            setGame({ room_id: newRow.room_id, username: newRow.username ?? [], started: newRow.started ?? false });
           }
         }
       )
@@ -120,6 +123,23 @@ export default function RoomPage() {
     router.push("/");
   };
 
+  const startGame = async () => {
+    if (!roomid || !isHost) return;
+    setBusyStart(true);
+    try {
+      const { data, error } = await supabase
+        .from('games')
+        .update({ started: true })
+        .eq('room_id', roomid)
+        .select('room_id, username, started')
+        .single();
+      if (!error && data) {
+        setGame({ room_id: data.room_id, username: data.username, started: data.started });
+      }
+    } catch {}
+    setBusyStart(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
       <div className="arcade-container bg-purple-800/30 backdrop-blur-lg rounded-3xl border-4 border-purple-400 shadow-2xl shadow-purple-500/25 p-8 w-full max-w-lg">
@@ -149,7 +169,19 @@ export default function RoomPage() {
           </ul>
         )}
 
-        <div className="mt-8">
+        {isHost && (
+          <div className="mt-4">
+            <button
+              onClick={startGame}
+              disabled={busyStart || (game?.username?.length ?? 0) <= 1 || game?.started === true}
+              className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold uppercase tracking-wider rounded-xl border-3 border-emerald-300 shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/50 disabled:opacity-60"
+            >
+              {game?.started ? 'Game Started' : busyStart ? 'Starting...' : 'Start Game'}
+            </button>
+          </div>
+        )}
+
+        <div className="mt-4">
           <button
             onClick={leaveRoom}
             disabled={busy}
